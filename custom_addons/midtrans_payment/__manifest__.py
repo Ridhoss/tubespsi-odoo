@@ -11,6 +11,7 @@
     "assets": {
         "point_of_sale._assets_pos": [
             "midtrans_payment/static/src/js/pos_midtrans_button.js",
+            "midtrans_payment/static/src/js/pos_warning.js",
             "midtrans_payment/static/src/xml/pos_midtrans_button.xml",
         ],
     },
