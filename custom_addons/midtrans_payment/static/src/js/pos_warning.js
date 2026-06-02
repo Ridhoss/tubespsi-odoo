@@ -3,12 +3,13 @@
 import { patch } from "@web/core/utils/patch";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { useService } from "@web/core/utils/hooks";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 patch(PaymentScreen.prototype, {
   setup() {
     super.setup();
 
-    this.notification = useService("notification");
+    this.dialog = useService("dialog");
 
     console.log("MIDTRANS PAYMENT SCREEN PATCH LOADED");
   },
@@ -24,54 +25,65 @@ patch(PaymentScreen.prototype, {
       return;
     }
 
-    const warnings = [];
+    // Group warning per kategori
+    const groupedWarnings = {
+      "Mudah Pecah": [],
+      "Barang Tajam": [],
+      "Bahan Kimia": [],
+      "Cairan Mudah Terbakar": [],
+    };
 
     for (const line of order.lines) {
       const product = line.product_id;
-
       const categories = product?.pos_categ_ids || [];
 
       for (const category of categories) {
         const categoryName = category.name;
 
-        console.log("POS CATEGORY:", categoryName);
-
         switch (categoryName) {
           case "Mudah Pecah":
-            warnings.push(
-              `• ${product.display_name}\n` +
-                `Produk memerlukan penanganan dan pengemasan khusus karena memiliki karakteristik mudah pecah.`,
-            );
-            break;
-
           case "Barang Tajam":
-            warnings.push(
-              `• ${product.display_name}\n` +
-                `Produk memerlukan perlindungan tambahan guna meminimalkan risiko cedera selama proses pengemasan dan distribusi.`,
-            );
-            break;
-
           case "Bahan Kimia":
-            warnings.push(
-              `• ${product.display_name}\n` +
-                `Produk termasuk bahan kimia yang memerlukan prosedur pengemasan sesuai standar keselamatan.`,
-            );
-            break;
-
           case "Cairan Mudah Terbakar":
-            warnings.push(
-              `• ${product.display_name}\n` +
-                `Produk memiliki karakteristik mudah terbakar sehingga membutuhkan penanganan dan penyimpanan khusus.`,
-            );
+            groupedWarnings[categoryName].push(product.display_name);
             break;
         }
       }
     }
 
-    if (warnings.length) {
-      this.notification.add(warnings.join("\n\n"), {
-        type: "warning",
-        sticky: true,
+    // Popup bertumpuk (1 kategori = 1 popup)
+    for (const [category, products] of Object.entries(groupedWarnings)) {
+      if (!products.length) continue;
+
+      let description = "";
+
+      switch (category) {
+        case "Mudah Pecah":
+          description =
+            "Produk berikut memerlukan penanganan dan pengemasan khusus karena mudah pecah:";
+          break;
+
+        case "Barang Tajam":
+          description =
+            "Produk berikut memerlukan perlindungan tambahan untuk meminimalkan risiko cedera:";
+          break;
+
+        case "Bahan Kimia":
+          description =
+            "Produk berikut termasuk bahan kimia dan memerlukan prosedur pengemasan sesuai standar keselamatan:";
+          break;
+
+        case "Cairan Mudah Terbakar":
+          description =
+            "Produk berikut memiliki karakteristik mudah terbakar dan membutuhkan penanganan khusus:";
+          break;
+      }
+
+      this.dialog.add(AlertDialog, {
+        title: category,
+        body: `${description}\n\n` + products.map((p) => `• ${p}`).join("\n"),
+        confirmLabel: "OK",
+        dialogClass: "midtrans-warning-dialog",
       });
     }
   },
