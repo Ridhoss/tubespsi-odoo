@@ -3,7 +3,7 @@
 import { patch } from "@web/core/utils/patch";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { useService } from "@web/core/utils/hooks";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { WarningDialog } from "./warning_dialog";
 
 patch(PaymentScreen.prototype, {
   setup() {
@@ -25,65 +25,87 @@ patch(PaymentScreen.prototype, {
       return;
     }
 
-    // Group warning per kategori
+    const categoriesConfig = {
+      "Mudah Pecah": {
+        icon: "fa fa-cube",
+        color: "#3b82f6",
+        description: "Produk rentan terhadap benturan dan kerusakan fisik.",
+      },
+
+      "Barang Tajam": {
+        icon: "fa fa-scissors",
+        color: "#ef4444",
+        description:
+          "Produk memiliki sisi tajam yang perlu penanganan hati-hati.",
+      },
+
+      "Bahan Kimia": {
+        icon: "fa fa-flask",
+        color: "#8b5cf6",
+        description:
+          "Produk termasuk bahan kimia yang memerlukan perhatian khusus.",
+      },
+
+      "Mudah Terbakar": {
+        icon: "fa fa-fire",
+        color: "#f97316",
+        description:
+          "Produk mudah terbakar dan harus dijauhkan dari sumber panas.",
+      },
+    };
+
     const groupedWarnings = {
       "Mudah Pecah": [],
       "Barang Tajam": [],
       "Bahan Kimia": [],
-      "Cairan Mudah Terbakar": [],
+      "Mudah Terbakar": [],
     };
 
     for (const line of order.lines) {
       const product = line.product_id;
-      const categories = product?.pos_categ_ids || [];
+
+      if (!product) continue;
+
+      const categories = product.pos_categ_ids || [];
 
       for (const category of categories) {
         const categoryName = category.name;
 
-        switch (categoryName) {
-          case "Mudah Pecah":
-          case "Barang Tajam":
-          case "Bahan Kimia":
-          case "Cairan Mudah Terbakar":
-            groupedWarnings[categoryName].push(product.display_name);
-            break;
+        if (groupedWarnings[categoryName]) {
+          groupedWarnings[categoryName].push(product.display_name);
         }
       }
     }
 
-    // Popup bertumpuk (1 kategori = 1 popup)
+    console.log("GROUPED WARNINGS", groupedWarnings);
+
+    const warnings = [];
+
     for (const [category, products] of Object.entries(groupedWarnings)) {
       if (!products.length) continue;
 
-      let description = "";
+      const config = categoriesConfig[category];
 
-      switch (category) {
-        case "Mudah Pecah":
-          description =
-            "Produk berikut memerlukan penanganan dan pengemasan khusus karena mudah pecah:";
-          break;
+      warnings.push({
+        category,
+        products,
+        icon: config.icon,
+        level: config.level,
+        color: config.color,
+        description: config.description,
+        instructions: config.instructions,
+      });
+    }
 
-        case "Barang Tajam":
-          description =
-            "Produk berikut memerlukan perlindungan tambahan untuk meminimalkan risiko cedera:";
-          break;
+    console.log("FINAL WARNINGS", warnings);
 
-        case "Bahan Kimia":
-          description =
-            "Produk berikut termasuk bahan kimia dan memerlukan prosedur pengemasan sesuai standar keselamatan:";
-          break;
+    if (!warnings.length) {
+      return;
+    }
 
-        case "Cairan Mudah Terbakar":
-          description =
-            "Produk berikut memiliki karakteristik mudah terbakar dan membutuhkan penanganan khusus:";
-          break;
-      }
-
-      this.dialog.add(AlertDialog, {
-        title: category,
-        body: `${description}\n\n` + products.map((p) => `• ${p}`).join("\n"),
-        confirmLabel: "OK",
-        dialogClass: "midtrans-warning-dialog",
+    for (const w of warnings) {
+      this.dialog.add(WarningDialog, {
+        warnings: [w],
       });
     }
   },

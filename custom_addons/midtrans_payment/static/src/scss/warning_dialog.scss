@@ -1,0 +1,71 @@
+.wp-warning-container {
+    padding: 8px;
+}
+
+.wp-warning-card {
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid #ececec;
+    padding: 18px;
+}
+
+.wp-warning-header {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.wp-warning-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+    font-size: 28px;
+
+    flex-shrink: 0;
+}
+
+.wp-warning-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.wp-warning-description {
+    margin-top: 4px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.wp-products {
+    margin-top: 18px;
+}
+
+.wp-products-label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #374151;
+}
+
+.wp-product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.wp-product-tag {
+    background: #f3f4f6;
+    color: #374151;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.wp-confirm-btn {
+    min-width: 140px;
+}

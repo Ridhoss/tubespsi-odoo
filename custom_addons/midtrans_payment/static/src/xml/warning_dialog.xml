@@ -1,0 +1,75 @@
+<t t-name="midtrans_payment.WarningDialog">
+    <Dialog title="'Peringatan Produk'" size="'md'">
+
+        <div class="wp-warning-container">
+
+            <t t-foreach="props.warnings"
+               t-as="warning"
+               t-key="warning.category">
+
+                <div class="wp-warning-card">
+
+                    <div class="wp-warning-header">
+
+                        <div class="wp-warning-icon"
+                             t-att-style="'background:' + warning.color">
+
+                            <i t-att-class="warning.icon"/>
+                        </div>
+
+                        <div class="wp-warning-content">
+
+                            <div class="wp-warning-title">
+                                <t t-esc="warning.category"/>
+                            </div>
+
+                            <div class="wp-warning-description">
+                                <t t-esc="warning.description"/>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="wp-products">
+
+                        <div class="wp-products-label">
+                            Produk terkait
+                        </div>
+
+                        <div class="wp-product-tags">
+
+                            <t t-foreach="warning.products"
+                               t-as="p"
+                               t-key="p">
+
+                                <span class="wp-product-tag">
+                                    <t t-esc="p"/>
+                                </span>
+
+                            </t>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </t>
+
+        </div>
+
+        <t t-set-slot="footer">
+
+            <button
+                class="btn btn-primary wp-confirm-btn"
+                t-on-click="props.close">
+
+                Saya Mengerti
+
+            </button>
+
+        </t>
+
+    </Dialog>
+</t>
