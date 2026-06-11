@@ -1,6 +1,7 @@
 import base64
 import requests
 import os
+import uuid
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
@@ -72,18 +73,10 @@ class SaleOrder(models.Model):
                 }
             }
 
-        # Jika payment link sudah ada, buka lagi
-        if self.midtrans_payment_url:
-            return {
-                'type': 'ir.actions.act_url',
-                'url': self.midtrans_payment_url,
-                'target': 'new',
-            }
-
         headers = self._get_headers()
 
         unique_order_id = (
-            f"{self.name}-{self.id}"
+            f"SO-{uuid.uuid4().hex[:12]}"
         )
 
         payload = {
