@@ -16,7 +16,7 @@
                     name="action_dummy_midtrans"
                     type="object"
                     string="Pay with Midtrans"
-                    invisible="midtrans_status == 'settlement'" />
+                    invisible="is_paid"/>
 
                 <button
                     name="action_check_midtrans_status"
@@ -29,6 +29,8 @@
             <xpath expr="//sheet" position="inside">
 
                 <group string="Midtrans Payment">
+
+                    <field name="is_paid" invisible="1"/>
 
                     <field
                         name="midtrans_status"

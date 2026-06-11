@@ -2,7 +2,7 @@ import base64
 import requests
 import os
 
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 class SaleOrder(models.Model):
@@ -22,6 +22,26 @@ class SaleOrder(models.Model):
         string="Payment URL",
         readonly=True
     )
+    
+    is_paid = fields.Boolean(
+        string="Paid",
+        compute="_compute_is_paid",
+        store=False,
+    )
+
+    @api.depends(
+        'midtrans_status',
+        'invoice_ids.payment_state'
+    )
+    def _compute_is_paid(self):
+        for order in self:
+            order.is_paid = (
+                order.midtrans_status == "settlement"
+                or any(
+                    inv.payment_state == "paid"
+                    for inv in order.invoice_ids
+                )
+            )
 
     def _get_headers(self):
         server_key = os.getenv("MIDTRANS_SERVER_KEY")
